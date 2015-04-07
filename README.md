@@ -18,6 +18,6 @@ There should be some diagnostic information printed from the cross validation st
 that is suitable for submission to kaggle.
 
 ### Goals:
-- high classification accuracy (above .8)
-- effective feature calculation
-- explore other approaches besides Random Forest.
+[x] high classification accuracy (above .8)
+[x] effective feature calculation
+[ ] explore other approaches besides Random Forest.
