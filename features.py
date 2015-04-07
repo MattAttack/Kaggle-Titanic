@@ -1,42 +1,83 @@
 import numpy
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
 
 import utils
 
 
-def gender_func(row, **kwargs):
-    return 0 if row["Sex"] == 'male' else 1
-
-
-def age_func(row, **kwargs):
-    data = kwargs["data"]
-    age = row["Age"]
-    if age != '':
-        return float(age)
-    return numpy.mean([float(j["Age"]) for j in data if j["Age"] != ''])
-
-
-def sibling_func(row, **kwargs):
-    return float(row["SibSp"])
-
-
 class Features:
-    feature_transforms = [
-        gender_func,
-        age_func,
-        sibling_func,
-    ]
-    feature_labels = [
-        "gender",
-        "age",
-        "siblings"
+    categories = [
+        "Pclass",
+        "Embarked"
     ]
 
     def __init__(self):
         self._train = None
         self._test = None
         self.scaler = StandardScaler()
+        self._labels = {}  # to encode categorical variables, we use LabelEncoder to turn columns into integers,
+        self.enc = OneHotEncoder(sparse=False)  # then OneHotEncoder to turn integers into binary arrays.
+        # For example "Embarked C" --> 1 --> [0, 1, 0].
         self._is_scaled = False
+        self._is_encoded = False
+        self._means = {}
+
+    def category_labels(self):
+        labels = []
+        for category in self.categories:
+            for j in self.labelencoder(category).classes_:
+                labels.append("{:s} {:s}".format(category, j))
+        return labels
+
+    def feature_labels(self):
+        return ["gender",
+                "age",
+                "siblings and spouses",
+                "parents and children",
+                "fare"] + self.category_labels()
+
+    @property
+    def feature_funcs(self):
+        return [self.gender_func,
+                self.float_col("Age"),
+                self.float_col("SibSp"),
+                self.float_col("Parch"),
+                self.float_col("Fare"),
+                self.category_cols
+                ]
+
+    def _encode(self):
+        if not self._is_encoded:
+            self._is_encoded = True
+            self.enc.fit([[self.label_col(row, cat) for cat in self.categories] for row in self.train])
+
+    def labelencoder(self, col):
+        if col not in self._labels:
+            self._labels[col] = LabelEncoder().fit([j[col] for j in self.train])
+        return self._labels[col]
+
+    def label_col(self, row, col):
+        return self.labelencoder(col).transform([row[col]])[0]
+
+    def mean_col(self, col):
+        if col not in self._means:
+            self._means[col] = numpy.mean([float(j[col]) for j in self.train if j[col] != ''])
+        return self._means[col]
+
+    def float_col(self, col):
+        def func(row):
+            try:
+                return [float(row[col])]
+            except ValueError:
+                return [self.mean_col(col)]
+
+        return func
+
+    def category_cols(self, row):
+        self._encode()
+        return self.enc.transform([[self.label_col(row, cat) for cat in self.categories]]).tolist()[0]
+
+    def gender_func(self, row):
+        return [0] if row["Sex"] == 'male' else [1]
 
     def data(self, data_set):
         if data_set == 'train':
@@ -60,7 +101,7 @@ class Features:
 
     def raw_features(self, data_set='train'):
         return numpy.array(
-            [[func(j, data=self.data(data_set)) for func in self.feature_transforms] for j in self.data(data_set)]
+            [sum([func(j) for func in self.feature_funcs], []) for j in self.data(data_set)]
         )
 
     def features(self, data_set='train'):
@@ -74,3 +115,11 @@ class Features:
 
     def features_labels_and_ids(self, data_set='train'):
         return self.features(data_set), self.labels(data_set), self.ids(data_set)
+
+
+def main():
+    print(Features().category_labels())
+
+
+if __name__ == '__main__':
+    main()

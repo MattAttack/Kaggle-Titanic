@@ -19,7 +19,7 @@ def get_model():
     best_score = 0
     best_parms = {}
     for penalty in ("l1", "l2"):
-        for C in [10 ** (0.5 * j) for j in range(-10, 10)]:
+        for C in [10 ** (0.5 * j) for j in range(-1, 1)]:
             clf = LogisticRegression(penalty=penalty, C=C)
             score = cross_val_score(clf, features, labels, cv=20).mean()
             if score > best_score:
@@ -33,7 +33,7 @@ def get_model():
         str(best_parms["C"]),
         100 * best_score,
         "\n\t".join(
-            ["{:s}:\t{:.3f}".format(*j) for j in zip(FEATURE_GETTER.feature_labels, best_model.coef_[0])]
+            ["{:s}:\t{:.3f}".format(*j) for j in zip(FEATURE_GETTER.feature_labels(), best_model.coef_[0])]
         )
     ))
     return best_model
