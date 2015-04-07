@@ -5,6 +5,10 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(DIR, 'data')
 TEST_CSV = os.path.join(DATA_DIR, 'test.csv')
 TRAIN_CSV = os.path.join(DATA_DIR, 'train.csv')
+OUT_DATA = os.path.join(DIR, 'out_data')
+
+if not os.path.exists(OUT_DATA):
+    os.mkdir(OUT_DATA)
 
 
 def get_features(data_set='train', return_type='array'):

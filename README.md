@@ -8,6 +8,15 @@ $ Rscript explore.R
 We aren't using a virtualenv, because numpy/scipy/sklearn don't install cleanly, so installation will be a little 
 fussy.  Probably if you are using [anacondas](https://store.continuum.io/cshop/anaconda/) you'll be fine.
 
+
+Fit a model using
+```
+$ python model.py
+```
+
+There should be some diagnostic information printed from the cross validation stage, and a file should be printed
+that is suitable for submission to kaggle.
+
 ### Goals:
 - high classification accuracy (above .8)
 - effective feature calculation
