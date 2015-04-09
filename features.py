@@ -77,7 +77,7 @@ class Features:
         return self.enc.transform([[self.label_col(row, cat) for cat in self.categories]]).tolist()[0]
 
     def gender_func(self, row):
-        return [0] if row["Sex"] == 'male' else [1]
+        return [int(row["Sex"] != 'male')]
 
     def data(self, data_set):
         if data_set == 'train':
