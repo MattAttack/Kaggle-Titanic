@@ -18,22 +18,27 @@ that is suitable for submission to kaggle.
 
 ### Current record
 ```
-Best model was SVC with , accuracy 82.147%, and params:
-    kernel: rbf
-    C:  1.0
-    verbose:    False
-    probability:    False
-    degree: 3
-    shrinking:  True
-    max_iter:   -1
-    random_state:   None
-    tol:    0.001
-    cache_size: 200
-    coef0:  0.0
-    gamma:  0.0
-    class_weight:   None
+Best model:                                                   
+GradientBoostingClassifier with accuracy 83.185%, and params: 
+        warm_start:     False                                 
+        loss:   exponential                                   
+        verbose:        0                                     
+        subsample:      1.0                                   
+        max_leaf_nodes: None                                  
+        learning_rate:  0.1                                   
+        min_samples_leaf:       1                             
+        n_estimators:   100                                   
+        min_samples_split:      2                             
+        init:   None                                          
+        min_weight_fraction_leaf:       0.0                   
+        random_state:   None                                  
+        max_features:   None                                  
+        max_depth:      5                                     
 ```
 
+### NEXT
+As a point of fact, submitting the output of this scored 0.75598.  Might have to dig into sklearns cross validation, or actually
+use a separate test set to figure out how the model might generalize (this seems like a big drop).
 
 ### Goals:
 - [x] high classification accuracy (above .8)
