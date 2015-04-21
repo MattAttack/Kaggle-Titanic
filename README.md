@@ -5,33 +5,37 @@ Files in the R/ directory are for exploring the data set.  Run with
 ```
 $ Rscript explore.R
 ```
-We aren't using a virtualenv, because numpy/scipy/sklearn don't install cleanly, so installation will be a little 
-fussy.  Probably if you are using [anacondas](https://store.continuum.io/cshop/anaconda/) you'll be fine.
-
-
-Fit a model using
+You should be able to run this in a virtual environment.  From the cloned repo, run
 ```
+$ virtualenv venv
+$ source venv/bin/activate
+$ pip install -r requirements.txt
 $ python model.py
 ```
 
 There should be some diagnostic information printed from the cross validation stage, and a file should be printed
 that is suitable for submission to kaggle.
 
-## NEXT
-Expand the `model.get_model` function so that it runs through a list of models and parameters and automatically selects the best one.  For example, the list of models might start:
+### Current record
 ```
-models = [ (LogisticRegression, {"penalty": ("l1", "l2"), "C": [10 ** (0.5 * j) for j in range(-10, 10)]}), ... ]
+Best model was SVC with , accuracy 82.147%, and params:
+    kernel: rbf
+    C:  1.0
+    verbose:    False
+    probability:    False
+    degree: 3
+    shrinking:  True
+    max_iter:   -1
+    random_state:   None
+    tol:    0.001
+    cache_size: 200
+    coef0:  0.0
+    gamma:  0.0
+    class_weight:   None
 ```
-Then sklearn is nice, so we could do something like
-```
-for model_func, model_params in models:
-  for parameter_dict in itertools.have_to_lookup_this_function(model_params):
-    clf = model_func(**parameter_dict)
-    ...
-```
-sklearn's api gives us that the object `clf` will have the methods `.fit`, `.transform`, `.score`, `.fit_transform`, so we should be able to continue with the cross validation already in there. Then we save the `model_func` and `parameter_dict` from the best model, and return those.
+
 
 ### Goals:
 - [x] high classification accuracy (above .8)
 - [x] effective feature calculation
-- [ ] explore other approaches besides Random Forest.
+- [x] explore other approaches besides Random Forest.
