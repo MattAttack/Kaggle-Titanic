@@ -1,3 +1,8 @@
+# Our files
+out_data/
+
+
+#### GITHUB RECOMMENDED PYTHON FILES ####
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

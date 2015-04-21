@@ -1,5 +1,7 @@
 import os
 import csv
+import pandas as pd
+import numpy as np
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(DIR, 'data')
@@ -13,14 +15,9 @@ if not os.path.exists(OUT_DATA):
 
 def get_features(data_set='train', return_type='array'):
     fname = TRAIN_CSV if data_set == 'train' else TEST_CSV
-    with open(fname, 'r') as buff:
-        if return_type == 'dict':
-            reader = csv.DictReader(buff)
-        else:
-            reader = csv.reader(buff)
-            next(reader)  # skip header
-        data = list(reader)
-    return data
+    df = pd.read_csv(fname)
+    df.ix[df['Embarked'].isnull(), 'Embarked'] = 'S'
+    return df.replace(np.nan, 0)
 
 
 def main():

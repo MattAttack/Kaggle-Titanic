@@ -1,6 +1,6 @@
+import sys
 import numpy
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
-
 import utils
 
 
@@ -15,6 +15,7 @@ class Features:
         self._test = None
         self.scaler = StandardScaler()
         self._labels = {}  # to encode categorical variables, we use LabelEncoder to turn columns into integers,
+        self._raw_features = {}
         self.enc = OneHotEncoder(sparse=False)  # then OneHotEncoder to turn integers into binary arrays.
         # For example "Embarked C" --> 1 --> [0, 1, 0].
         self._is_scaled = False
@@ -25,7 +26,7 @@ class Features:
         labels = []
         for category in self.categories:
             for j in self.labelencoder(category).classes_:
-                labels.append("{:s} {:s}".format(category, j))
+                labels.append("{:s} {}".format(category, j))
         return labels
 
     def feature_labels(self):
@@ -48,19 +49,24 @@ class Features:
     def _encode(self):
         if not self._is_encoded:
             self._is_encoded = True
-            self.enc.fit([[self.label_col(row, cat) for cat in self.categories] for row in self.train])
+
+            for cat in self.categories:
+                self.train[cat] = self.labelencoder(cat).transform(self.train[cat].values)
+
+            self.enc.fit(self.train[self.categories].values)
+
 
     def labelencoder(self, col):
         if col not in self._labels:
-            self._labels[col] = LabelEncoder().fit([j[col] for j in self.train])
+            self._labels[col] = LabelEncoder().fit(self.train[col].values)
         return self._labels[col]
 
     def label_col(self, row, col):
-        return self.labelencoder(col).transform([row[col]])[0]
+        return self.labelencoder(col).transform(row[col])
 
     def mean_col(self, col):
         if col not in self._means:
-            self._means[col] = numpy.mean([float(j[col]) for j in self.train if j[col] != ''])
+            self._means[col] = numpy.mean([float(j[col]) for (idx, j) in self.train.iterrows() if j[col]])
         return self._means[col]
 
     def float_col(self, col):
@@ -74,7 +80,13 @@ class Features:
 
     def category_cols(self, row):
         self._encode()
-        return self.enc.transform([[self.label_col(row, cat) for cat in self.categories]]).tolist()[0]
+        try:
+            val = [self.label_col(row, cat) for cat in self.categories]
+            return self.enc.transform([val]).tolist()[0]
+        except ValueError, e:
+            print '\n\n*** ERROR: caught value error', e, '***\n\n'
+            print 'row:\n', row
+            sys.exit(1)
 
     def gender_func(self, row):
         return [int(row["Sex"] != 'male')]
@@ -87,31 +99,35 @@ class Features:
     @property
     def train(self):
         if self._train is None:
-            self._train = utils.get_features(data_set='train', return_type='dict')
+            self._train = utils.get_features(data_set='train')
         return self._train
 
     @property
     def test(self):
         if self._test is None:
-            self._test = utils.get_features(data_set='test', return_type='dict')
+            self._test = utils.get_features(data_set='test')
         return self._test
 
     def labels(self, data_set='train'):
-        return numpy.array([int(j.get("Survived", 0)) for j in self.data(data_set)])
+        if data_set == 'train':
+            return numpy.array([int(j["Survived"]) for (idx, j) in self.data(data_set).iterrows()])
 
     def raw_features(self, data_set='train'):
-        return numpy.array(
-            [sum([func(j) for func in self.feature_funcs], []) for j in self.data(data_set)]
-        )
+        if not self._raw_features.has_key(data_set):
+            self._raw_features[data_set] = numpy.array(
+                [sum([func(j) for func in self.feature_funcs], []) for (idx, j) in self.data(data_set).iterrows()]
+            )
+        return self._raw_features[data_set]
 
     def features(self, data_set='train'):
         if not self._is_scaled:
             self.scaler.fit(self.raw_features('train'))  # only fit on the training set
             self._is_scaled = True
+
         return self.scaler.transform(self.raw_features(data_set))
 
     def ids(self, data_set='train'):
-        return [j["PassengerId"] for j in self.data(data_set)]
+        return [j["PassengerId"] for (idx, j) in self.data(data_set).iterrows()]
 
     def features_labels_and_ids(self, data_set='train'):
         return self.features(data_set), self.labels(data_set), self.ids(data_set)

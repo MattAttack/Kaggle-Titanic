@@ -1,5 +1,6 @@
 import os
 from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
 from sklearn.cross_validation import cross_val_score
 
 import utils
@@ -16,15 +17,18 @@ FEATURE_GETTER = Features()
 
 def get_model():
     features, labels, _ = FEATURE_GETTER.features_labels_and_ids('train')
+    print 'got features'
     best_score = 0
     best_parms = {}
     for penalty in ("l1", "l2"):
         for C in [10 ** (0.5 * j) for j in range(-1, 1)]:
             clf = LogisticRegression(penalty=penalty, C=C)
+            #clf = GaussianNB()
             score = cross_val_score(clf, features, labels, cv=20).mean()
             if score > best_score:
                 best_score = score
                 best_parms = {"penalty": penalty, "C": C}
+                
     best_model = LogisticRegression(**best_parms)
     best_model.fit(features, labels)
 
@@ -44,9 +48,9 @@ def write_predictions():
     features, _, ids = FEATURE_GETTER.features_labels_and_ids('test')
     predictions = clf.predict(features)
     fname = os.path.join(utils.OUT_DATA, 'predictions.csv')
-    with open(fname, 'w') as buff:
+    with open(fname, 'wb') as buff:
         buff.write("PassengerId,Survived\n")
-        buff.write("\n".join(["{:s},{:d}".format(*j) for j in zip(ids, predictions)]))
+        buff.write("\n".join(["{:d},{:d}".format(*j) for j in zip(ids, predictions)]))
 
 
 def main():
