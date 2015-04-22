@@ -1,5 +1,6 @@
 import os
 import itertools
+import numpy
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
@@ -38,7 +39,9 @@ def get_model(verbose=False):
     for model, param_opts in MODELS:
         for params in get_possible_params(param_opts):
             clf = model(**params)
-            score = cross_val_score(clf, features, labels, cv=20).mean()
+            score = numpy.median(
+                numpy.array(cross_val_score(clf, features, labels, cv=20))
+            )
             if score > best_score:
                 if verbose:
                     print("New record:\n{:s}".format(print_model(model, clf, score)))
