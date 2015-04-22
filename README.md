@@ -18,26 +18,26 @@ that is suitable for submission to kaggle.
 
 ### Current record
 ```
-Best model:                                                   
-GradientBoostingClassifier with accuracy 83.185%, and params: 
-        warm_start:     False                                 
-        loss:   exponential                                   
-        verbose:        0                                     
-        subsample:      1.0                                   
-        max_leaf_nodes: None                                  
-        learning_rate:  0.1                                   
-        min_samples_leaf:       1                             
-        n_estimators:   100                                   
-        min_samples_split:      2                             
-        init:   None                                          
-        min_weight_fraction_leaf:       0.0                   
-        random_state:   None                                  
-        max_features:   None                                  
-        max_depth:      5                                     
+Best model:
+GradientBoostingClassifier with accuracy 84.268%, and params:
+        warm_start:     False
+        loss:   exponential
+        verbose:        0
+        subsample:      1.0
+        max_leaf_nodes: None
+        learning_rate:  0.1
+        min_samples_leaf:       1
+        n_estimators:   100
+        min_samples_split:      2
+        init:   None
+        min_weight_fraction_leaf:       0.0
+        random_state:   None
+        max_features:   None
+        max_depth:      5
 ```
 
 ### NEXT
-As a point of fact, submitting the output of this scored 0.75598.  Might have to dig into sklearns cross validation, or actually
+As a point of fact, submitting the output of this scored 0.77033.  Might have to dig into sklearns cross validation, or actually
 use a separate test set to figure out how the model might generalize (this seems like a big drop).
 
 ### Goals:
